@@ -10,6 +10,11 @@ const getCards = async (cardsArray) => {
   const cards = await Card.find({ bizNumber: { $in: cardsArray } });
   return cards;
 };
+
+const getFavoriteCards = async (user) => {
+  return user;
+};
+
 router.get("/cards", auth, async (req, res) => {
   if (!req.query.numbers) res.status(400).send("Missing numbers data");
 
@@ -21,15 +26,20 @@ router.get("/cards", auth, async (req, res) => {
 });
 
 router.patch("/cards", auth, async (req, res) => {
-  const { error } = validateCards(req.body);
-  if (error) res.status(400).send(error.details[0].message);
-
   const cards = await getCards(req.body.cards);
   if (cards.length != req.body.cards.length)
     res.status(400).send("Card numbers don't match");
 
   let user = await User.findById(req.user._id);
-  user.cards = req.body.cards;
+
+  user.favoriteCards = req.body.cards;
+  user = await user.save();
+  res.send(user);
+});
+
+router.put("/favorite-cards", auth, async (req, res) => {
+  let user = await User.findById(req.user._id);
+  user.favoriteCards.push(req.body.cardId);
   user = await user.save();
   res.send(user);
 });
