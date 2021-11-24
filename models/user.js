@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   },
   createdAt: { type: Date, default: Date.now },
   cards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Card" }],
-  favoriteCards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Card" }],
+  favoriteCards: [{ type: mongoose.Schema.Types.String, ref: "Card" }],
 });
 
 userSchema.methods.generateAuthToken = function () {

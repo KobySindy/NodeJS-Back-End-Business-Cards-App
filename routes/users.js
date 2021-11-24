@@ -6,56 +6,46 @@ const { Card } = require("../models/card");
 const auth = require("../middleware/auth");
 const router = express.Router();
 
+//Taking array of BizNumbers and sending back the cards
 const getCards = async (cardsArray) => {
   const cards = await Card.find({ bizNumber: { $in: cardsArray } });
   return cards;
 };
 
-const getFavoriteCards = async (user) => {
-  return user;
-};
-
-router.get("/cards", auth, async (req, res) => {
-  if (!req.query.numbers) res.status(400).send("Missing numbers data");
-
+//Returning the user FavoriteCards
+router.get("/favorite-cards", auth, async (req, res) => {
+  if (!req.query.bizNum) res.status(400).send("Missing bizNum data");
   let data = {};
-  data.cards = req.query.numbers.split(",");
-
-  const cards = await getCards(data.cards);
+  data.favoriteCards = req.query.bizNum.split(",");
+  const cards = await getCards(data.favoriteCards);
+  console.log(cards);
   res.send(cards);
 });
 
-router.patch("/cards", auth, async (req, res) => {
-  const cards = await getCards(req.body.cards);
-  if (cards.length != req.body.cards.length)
-    res.status(400).send("Card numbers don't match");
-
-  let user = await User.findById(req.user._id);
-
-  user.favoriteCards = req.body.cards;
-  user = await user.save();
-  res.send(user);
-});
-
+//Add New Favorite Card
 router.put("/favorite-cards", auth, async (req, res) => {
   let user = await User.findById(req.user._id);
-  user.favoriteCards.push(req.body.cardId);
+  user.favoriteCards.push(req.body.cardBizNumber);
   user = await user.save();
   res.send(user);
 });
 
+//Sending The User Data
 router.get("/me", auth, async (req, res) => {
   const user = await User.findById(req.user._id).select("-password");
+
   const cards = await Card.find({ user_id: req.user._id });
   user.cards = cards;
   res.send(user);
 });
 
-router.get("/mecards", auth, async (req, res) => {
-  const cards = await Card.find({ user_id: req.user._id });
-  res.send(cards);
-});
+//Not In Use
+// router.get("/mecards", auth, async (req, res) => {
+//   const cards = await Card.find({ user_id: req.user._id });
+//   res.send(cards);
+// });
 
+//Create A New User
 router.post("/", async (req, res) => {
   const { error } = validate(req.body);
 
