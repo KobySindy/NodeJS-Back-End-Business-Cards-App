@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const _ = require("lodash");
-const { User, validate, validateCards } = require("../models/user");
+const { User, validate } = require("../models/user");
 const { Card } = require("../models/card");
 const auth = require("../middleware/auth");
 const router = express.Router();
@@ -18,7 +18,6 @@ router.get("/favorite-cards", auth, async (req, res) => {
   let data = {};
   data.favoriteCards = req.query.bizNum.split(",");
   const cards = await getCards(data.favoriteCards);
-  console.log(cards);
   res.send(cards);
 });
 
@@ -26,6 +25,17 @@ router.get("/favorite-cards", auth, async (req, res) => {
 router.put("/favorite-cards", auth, async (req, res) => {
   let user = await User.findById(req.user._id);
   user.favoriteCards.push(req.body.cardBizNumber);
+  user = await user.save();
+  res.send(user);
+});
+
+router.put("/favorite-cards-delete", auth, async (req, res) => {
+  console.log(req.body);
+  let user = await User.findById(req.user._id);
+  let updatedFavoriteCards = user.favoriteCards.filter(
+    (favoriteCard) => favoriteCard != req.body.cardBizNumber
+  );
+  user.favoriteCards = updatedFavoriteCards;
   user = await user.save();
   res.send(user);
 });
@@ -38,12 +48,6 @@ router.get("/me", auth, async (req, res) => {
   user.cards = cards;
   res.send(user);
 });
-
-//Not In Use
-// router.get("/mecards", auth, async (req, res) => {
-//   const cards = await Card.find({ user_id: req.user._id });
-//   res.send(cards);
-// });
 
 //Create A New User
 router.post("/", async (req, res) => {

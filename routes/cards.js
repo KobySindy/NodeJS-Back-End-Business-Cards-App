@@ -15,7 +15,7 @@ router.delete("/:id", auth, async (req, res) => {
   res.send(card);
 });
 
-//Edit Card
+//Edit/Update Card
 router.put("/:id", auth, async (req, res) => {
   const { error } = validateCard(req.body);
   if (error) return res.status(400).send(error.details[0].message);
