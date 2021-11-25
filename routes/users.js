@@ -24,9 +24,13 @@ router.get("/favorite-cards", auth, async (req, res) => {
 //Add New Favorite Card
 router.put("/favorite-cards", auth, async (req, res) => {
   let user = await User.findById(req.user._id);
-  user.favoriteCards.push(req.body.cardBizNumber);
-  user = await user.save();
-  res.send(user);
+  if (user.favoriteCards.includes(req.body.cardBizNumber)) {
+    res.send({ message: "This Card Is Already Favorite" });
+  } else {
+    user.favoriteCards.push(req.body.cardBizNumber);
+    user = await user.save();
+    res.send(user);
+  }
 });
 
 router.put("/favorite-cards-delete", auth, async (req, res) => {
